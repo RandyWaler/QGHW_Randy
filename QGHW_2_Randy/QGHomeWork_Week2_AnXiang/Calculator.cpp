@@ -329,6 +329,7 @@ void Calculator::Calculation()
 	symbolStack->clearStack();
 	symbolStack->initStack();
 	bool haveOper = false;//是否已经计算了一次运算符
+	bool isZore = false;
 	while (backEx->size()!=0)
 	{
 		exSym = backEx->front();
@@ -366,7 +367,7 @@ void Calculator::Calculation()
 				case '/':
 					if (firstEle.fl == 0) {
 						cerr << "\n发现除0运算！！！\n" << endl;
-						return;
+						isZore = true;
 					}
 					newCalEle = { SymbolType::Number,'\0',SceEle.fl / firstEle.fl };
 					symbolStack->pushStack(newCalEle);
@@ -479,6 +480,8 @@ void Calculator::Calculation()
 		backEx->pop_front();
 
 	}
-	
+	if (isZore) {
+		return;
+	}
 	cout << "表达式计算结果：" << symbolStack->getStackTopEle()->fl << endl;
 }
