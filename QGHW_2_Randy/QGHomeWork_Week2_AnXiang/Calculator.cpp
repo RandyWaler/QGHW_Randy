@@ -374,7 +374,7 @@ void Calculator::changeBackEx()
 		middleEx->pop_front();
 	}
 	//剩余栈中元素弹出
-	bool ishaveOper = false;
+
 	while (!symbolStack->isStackEmpty())
 	{
 		Symbol popSym;
@@ -386,17 +386,16 @@ void Calculator::changeBackEx()
 		{
 			cerr << "\n非法表达式！！！case11 括号不匹配\n" << endl;
 			reSet();
-			ishaveOper = true;
 			return;
 		}
 
 	}
-	if (!ishaveOper) {
+	
 		cout << "后缀式：" << endl;
 		backEx->showAllEleLink();
 
 		Calculation();
-	}
+
 }
 
 void Calculator::Calculation()
