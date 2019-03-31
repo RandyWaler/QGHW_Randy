@@ -35,7 +35,7 @@ void Calculator::getInputEx()
 	cin >> str;
 	SymbolType nowWillGetType = SymbolType::Number;
 	Symbol newSymbol;
-	char chlast;
+	char chlast='\0';
 	for (int i = 0; str[i] != '\0'&&str[i] != '\n'&&i<strLength; ) {
 		if (nowWillGetType == SymbolType::Number) {//当前应获取一个数字变量
 			int start = i;//起始位下标
@@ -57,6 +57,12 @@ void Calculator::getInputEx()
 						for (int j = i + 1; str[j] != '\0'&&str[j] != '\n'&&j < strLength; j++) {
 							if (str[j] == '(') {
 								nagCase = 1;
+								if (chlast == '-') {
+									cerr << "\n非法表达式！！！case1 请勿使用多重负号，否则无法判断翻转负号和运算负号\n" << endl;
+									reSet();
+									return;
+								}
+									
 								break;
 							}
 							else if (str[j] - '0' >= 0 && str[j] - '0' <= 9)
@@ -91,7 +97,7 @@ void Calculator::getInputEx()
 				else
 				{
 					if (str[i] != '+'&&str[i] != '(') {
-						cerr << "\n非法表达式！！！case1 运算符不匹配\n" << endl;
+						cerr << "\n非法表达式！！！case2 运算符不匹配\n" << endl;
 						reSet();
 						return;
 					}
@@ -107,12 +113,12 @@ void Calculator::getInputEx()
 				if (str[end] - '0' < 0 || str[end] - '0' > 9) {//发现非数字
 					if (str[end] == '.') {//发现小数点
 						if (isPoint) {//多个小数点
-							cerr << "\n非法表达式！！！case2 多重小数点\n" << endl;
+							cerr << "\n非法表达式！！！case3 多重小数点\n" << endl;
 							reSet();
 							return;
 						}
 						else if (str[end + 1] - '0'<0 ||str[end+1]-'0'>9) {//小数点后没有数字
-							cerr << "\n非法表达式！！！case3 小数点后无数字\n" << endl;
+							cerr << "\n非法表达式！！！case4 小数点后无数字\n" << endl;
 							reSet(); 
 							return;
 						}
@@ -126,7 +132,7 @@ void Calculator::getInputEx()
 						}
 						else//奇异符号
 						{
-							cerr << "\n非法表达式！！！case4 奇异符号\n" << endl;
+							cerr << "\n非法表达式！！！case5 奇异符号\n" << endl;
 							reSet();
 							return;
 						}
@@ -156,7 +162,7 @@ void Calculator::getInputEx()
 				}
 				else
 				{
-					cerr << "\n非法表达式！！！case5 运算符不匹配\n" << endl;
+					cerr << "\n非法表达式！！！case6 运算符不匹配\n" << endl;
 					reSet();
 					return;
 				}
@@ -184,24 +190,26 @@ void Calculator::getInputEx()
 								}
 								else if (str[j] != '+'&&str[j] != '(')
 								{
-									cerr << "\n非法表达式！！！case9 奇异符号\n" << endl;
+									cerr << "\n非法表达式！！！case7 奇异符号\n" << endl;
 									reSet();
 									return;
 								}
 							}
 							if (str[j] == '\0' || str[j] == '\n' || j >= strLength) {
-								cerr << "\n非法表达式！！！case10 运算符不匹配\n" << endl;
+								cerr << "\n非法表达式！！！case8 运算符不匹配\n" << endl;
 								reSet();
 								return;
 							}
 							if (nagTime == -1) {
 								newSymbol = { SymbolType::Operator,'-',0.0f };
 								middleEx->push_back(newSymbol);
+								chlast = '-';
 							}
 							else
 							{
 								newSymbol = { SymbolType::Operator,'+',0.0f };
 								middleEx->push_back(newSymbol);
+								chlast = '+';
 							}
 							i = j - 1;
 							continue;
@@ -211,6 +219,7 @@ void Calculator::getInputEx()
 							newSymbol = { SymbolType::Operator,str[i],0.0f };
 							middleEx->push_back(newSymbol);
 							nowWillGetType = SymbolType::Number;
+							chlast = str[i];
 							continue;
 						}
 
@@ -223,7 +232,7 @@ void Calculator::getInputEx()
 						}
 						else
 						{
-							cerr << "\n非法表达式！！！case6 奇异符号\n" << endl;
+							cerr << "\n非法表达式！！！case9 奇异符号\n" << endl;
 							reSet();
 							return;
 						}
@@ -232,7 +241,7 @@ void Calculator::getInputEx()
 				else if( str[i] == '(' || str[i] == ')')
 				{
 					if (sigleSym&&str[i] == ')') {
-						cerr << "\n非法表达式！！！case7 运算符不匹配\n" << endl;
+						cerr << "\n非法表达式！！！case10 运算符不匹配\n" << endl;
 						reSet();
 						return;
 					}
@@ -250,7 +259,7 @@ void Calculator::getInputEx()
 				else
 				{
 					
-					cerr << "\n非法表达式！！！case8 奇异符号\n" << endl;
+					cerr << "\n非法表达式！！！case11 奇异符号\n" << endl;
 					reSet();
 					return;
 				}
@@ -262,7 +271,7 @@ void Calculator::getInputEx()
 	
 	if (nowWillGetType == SymbolType::Number&&middleEx->back()->ch!=')') {
 
-		cerr << "\n非法表达式！！！case9 运算符不匹配\n" << endl;
+		cerr << "\n非法表达式！！！case12 运算符不匹配\n" << endl;
 		reSet();
 		return;
 	}
@@ -305,7 +314,7 @@ void Calculator::changeBackEx()
 					}
 				}
 				if (symbolStack->getSizeNow() == 0) {
-					cerr << "\n非法表达式！！！case12 括号不匹配\n" << endl;
+					cerr << "\n非法表达式！！！case13 括号不匹配\n" << endl;
 					reSet();
 					return;
 				}
@@ -384,7 +393,7 @@ void Calculator::changeBackEx()
 		}
 		else
 		{
-			cerr << "\n非法表达式！！！case11 括号不匹配\n" << endl;
+			cerr << "\n非法表达式！！！case14 括号不匹配\n" << endl;
 			reSet();
 			return;
 		}
