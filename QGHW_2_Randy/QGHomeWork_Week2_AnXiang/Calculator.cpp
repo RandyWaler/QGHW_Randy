@@ -45,6 +45,7 @@ void Calculator::getInputEx()
 			bool isPoint = false;//是否已经遇到小数点
 			float numRes = 0.0f;//数字结果
 			int nagCase = 0;
+			bool isHaveNag = false;
 			for (; str[i] != '\0'&&str[i] != '\n'&&i<strLength;i++) {//移动下标直到找到一个数字
 				if (str[i] - '0' >= 0 && str[i] - '0' <= 9) {
 					start = i; 
@@ -58,7 +59,7 @@ void Calculator::getInputEx()
 							if (str[j] == '(') {
 								nagCase = 1;
 								if (chlast == '-') {
-									cerr << "\n非法表达式！！！case1 请勿使用多重负号，否则无法判断翻转负号和运算负号\n" << endl;
+									cerr << "\n非法表达式！！！case1 请勿使用多重负号翻转，否则无法判断翻转负号和运算负号\n" << endl;
 									reSet();
 									return;
 								}
@@ -72,18 +73,28 @@ void Calculator::getInputEx()
 							}
 						}
 						if (nagCase == 1) {
-							int nagTime = -1;
-							for (int j = i + 1; str[j] != '\0'&&str[j] != '\n'&&j < strLength; j++) {
-								if (str[j] == '(') {
-									break;
+							if (!isHaveNag) {
+								isHaveNag = true;
+
+								int nagTime = -1;
+								for (int j = i + 1; str[j] != '\0'&&str[j] != '\n'&&j < strLength; j++) {
+									if (str[j] == '(') {
+										break;
+									}
+									else if (str[j] == '-') {
+										nagTime *= -1;
+									}
 								}
-								else if (str[j] == '-') {
-									nagTime *= -1;
+								if (nagTime == -1) {
+									newSymbol = { SymbolType::Operator,'-',0.0f };
+									middleEx->push_back(newSymbol);
 								}
 							}
-							if (nagTime == -1) {
-								newSymbol = { SymbolType::Operator,'-',0.0f };
-								middleEx->push_back(newSymbol);
+							else
+							{
+								cerr << "\n非法表达式！！！case1.1 请勿使用多重负号翻转，否则无法判断翻转负号和运算负号\n" << endl;
+								reSet();
+								return;
 							}
 						}
 					}
