@@ -583,52 +583,26 @@ void Calculator::Calculation()
 								}
 							}
 						}
-
-
-						//if (!isChangeNag) {//一次翻转一次正常运算
-						//	isChangeNag = true;
-						//	//乘给第一个数字
-						//	Symbol firstEle;
-						//	symbolStack->popStack(&firstEle);
-						//	firstEle.fl *= -1;
-
-						//	symbolStack->pushStack(firstEle);
-						//}
-						//else
-						//{
-						//	isChangeNag = false;
-						//	Symbol firstEle;
-						//	symbolStack->popStack(&firstEle);
-						//	Symbol SceEle;
-						//	symbolStack->popStack(&SceEle);
-						//	Symbol newCalEle;
-						//	newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-						//	symbolStack->pushStack(newCalEle);
-						//}
-
-						//Symbol sceEle = {SymbolType::Operator,'F',0.0f};
-						//backEx->getSceondEle(&sceEle);
-						////尾负号正常运算
-						//if (sceEle.ch=='F' || sceEle.type == SymbolType::Number) {
-						//	Symbol firstEle;
-						//	symbolStack->popStack(&firstEle);
-						//	Symbol SceEle;
-						//	symbolStack->popStack(&SceEle);
-						//	Symbol newCalEle;
-						//	newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-						//	symbolStack->pushStack(newCalEle);
-						//}
-						//else
-						//{
-						//	
-						//		//非尾负号乘给第一个数字
-						//		Symbol firstEle;
-						//		symbolStack->popStack(&firstEle);
-						//		firstEle.fl *= -1;
-
-						//		symbolStack->pushStack(firstEle);
-						//	//cout << "非尾负号  " <<symbolStack->getStackTopEle()->fl<<"  "<<symbolStack->getSizeNow()<< endl;
-						//}
+					}
+					//已经用完单次输入 开始使用栈内所有
+					else
+					{
+						if (symbolStack->getSizeNow() >= 2) {
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							Symbol SceEle;
+							symbolStack->popStack(&SceEle);
+							Symbol newCalEle;
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+						}
+						else
+						{
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							firstEle.fl *= -1;
+							symbolStack->pushStack(firstEle);
+						}
 					}
 				}
 				else
