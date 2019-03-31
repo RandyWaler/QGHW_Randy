@@ -11,6 +11,7 @@ Calculator::Calculator()
 	middleEx = new ForwardList();
 	backEx = new ForwardList();
 	backEx2 = new ForwardList();
+	backEx3 = new ForwardList();
 	symbolStack = new LinkStack<Symbol>();
 }
 
@@ -24,6 +25,7 @@ void Calculator::reSet()
 	middleEx->clear();
 	backEx->clear();
 	backEx2->clear();
+	backEx3->clear();
 	symbolStack->clearStack();
 	symbolStack->initStack();
 }
@@ -734,6 +736,7 @@ void Calculator::Calculation2()//根据单次入栈运算数和后方运算符 过滤出翻转负号
 	while (backEx2->size() != 0)
 	{
 		exSym = backEx2->front();
+		backEx3->push_back(*exSym);
 		if (exSym->type == SymbolType::Number) {//数字入栈
 
 			newSym = { SymbolType::Number,'\0',exSym->fl };
@@ -1015,5 +1018,91 @@ void Calculator::Calculation2()//根据单次入栈运算数和后方运算符 过滤出翻转负号
 		popEle = { SymbolType::Number,'\0',calRes };
 		symbolStack->pushStack(popEle);
 	}
-	cout << "\n前后对比法过滤法\n表达式计算结果：" << symbolStack->getStackTopEle()->fl << endl;
+	cout << "\n前后对比法过滤法-单次输入\n表达式计算结果：" << symbolStack->getStackTopEle()->fl << endl;
+	Calculation3();
+}
+void Calculator::Calculation3()//无任何过滤区分 过滤出翻转负号
+{
+	Symbol *exSym;
+	Symbol newSym;
+	symbolStack->clearStack();
+	symbolStack->initStack();
+	//bool haveOper = false;//是否已经计算了一次运算符
+	bool isZore = false;
+	//int onceNum = 0;
+	//bool isChangeNag = false;
+	while (backEx3->size() != 0)
+	{
+		exSym = backEx3->front();
+		if (exSym->type == SymbolType::Number) {//数字入栈
+
+			newSym = { SymbolType::Number,'\0',exSym->fl };
+			symbolStack->pushStack(newSym);
+		}
+		else
+		{
+			Symbol firstEle;
+			symbolStack->popStack(&firstEle);
+			Symbol SceEle;
+			symbolStack->popStack(&SceEle);
+			Symbol newCalEle;
+			switch (exSym->ch)
+			{
+			case '+':
+				newCalEle = { SymbolType::Number,'\0',SceEle.fl + firstEle.fl };
+				symbolStack->pushStack(newCalEle);
+				break;
+			case '-':
+				newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+				symbolStack->pushStack(newCalEle);
+				break;
+			case '*':
+				newCalEle = { SymbolType::Number,'\0',SceEle.fl * firstEle.fl };
+				symbolStack->pushStack(newCalEle);
+				break;
+			case '/':
+				if (firstEle.fl == 0) {
+					cerr << "\n发现除0运算！！！\n" << endl;
+					isZore = true;
+				}
+				newCalEle = { SymbolType::Number,'\0',SceEle.fl / firstEle.fl };
+				symbolStack->pushStack(newCalEle);
+				break;
+			case '^':
+				newCalEle = { SymbolType::Number,'\0',pow(SceEle.fl,firstEle.fl) };
+				symbolStack->pushStack(newCalEle);
+				break;
+			case '%':
+				newCalEle = { SymbolType::Number,'\0',(float)((int)SceEle.fl % (int)firstEle.fl) };
+				symbolStack->pushStack(newCalEle);
+				break;
+			default:
+				cerr << "\n后缀式错误！！！a\n" << endl;
+				return;
+			}
+			
+		}
+		backEx3->pop_front();
+	}
+		if (isZore) {
+			return;
+		}
+		if (symbolStack->getSizeNow() == 0) {
+			return;
+		}
+		if (symbolStack->getSizeNow() > 1) {
+			float calRes = 0.0f;
+			Symbol popEle;
+			while (symbolStack->getSizeNow() != 0)
+			{
+				symbolStack->popStack(&popEle);
+				calRes += popEle.fl;
+			}
+			popEle = { SymbolType::Number,'\0',calRes };
+			symbolStack->pushStack(popEle);
+		}
+		cout << "\n无任何过滤区分\n表达式计算结果：" << symbolStack->getStackTopEle()->fl << endl;
+		cout << "   " <<endl;
+	
+	
 }
