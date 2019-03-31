@@ -694,6 +694,14 @@ void Calculator::Calculation()//仅根据后方运算符 区分出翻转负号
 
 						//否则后缀式有误
 						cerr << "\n后缀式错误！！！ 您可能使用了叠加的负号翻转导致无法判断翻转负号和运算负号 \n" << exSym->ch << endl;
+						backEx->pop_front();
+						while (backEx->size() != 0)
+						{
+							exSym = backEx->front();
+							backEx2->push_back(*exSym);
+							backEx->pop_front();
+						}
+						Calculation2();
 						return;
 					}
 				}
@@ -992,6 +1000,14 @@ void Calculator::Calculation2()//根据单次入栈运算数和后方运算符 过滤出翻转负号
 
 						//否则后缀式有误
 						cerr << "\n后缀式错误！！！ 您可能使用了叠加的负号翻转导致无法判断翻转负号和运算负号 \n" << exSym->ch << endl;
+						backEx2->pop_front();
+						while (backEx2->size() != 0)
+						{
+							exSym = backEx2->front();
+							backEx3->push_back(*exSym);
+							backEx2->pop_front();
+						}
+						Calculation3();
 						return;
 					}
 				}
