@@ -10,6 +10,7 @@ Calculator::Calculator()
 {
 	middleEx = new ForwardList();
 	backEx = new ForwardList();
+	backEx2 = new ForwardList();
 	symbolStack = new LinkStack<Symbol>();
 }
 
@@ -22,6 +23,7 @@ void Calculator::reSet()
 {
 	middleEx->clear();
 	backEx->clear();
+	backEx2->clear();
 	symbolStack->clearStack();
 	symbolStack->initStack();
 }
@@ -420,7 +422,7 @@ void Calculator::changeBackEx()
 
 }
 
-void Calculator::Calculation()
+void Calculator::Calculation()//仅根据后方运算符 区分出翻转负号
 {
 	Symbol *exSym;
 	Symbol newSym;
@@ -429,10 +431,12 @@ void Calculator::Calculation()
 	bool haveOper = false;//是否已经计算了一次运算符
 	bool isZore = false;
 	int onceNum = 0;
+	backEx2->clear();
 	//bool isChangeNag = false;
 	while (backEx->size()!=0)
 	{
 		exSym = backEx->front();
+		backEx2->push_back(*exSym);
 		if (exSym->type == SymbolType::Number) {//数字入栈
 			
 			newSym = { SymbolType::Number,'\0',exSym->fl };
@@ -504,7 +508,7 @@ void Calculator::Calculation()
 					}
 					else if (onceNum >= 2)//不止一个
 					{
-						/*
+						
 						Symbol sceEle = { SymbolType::Operator,'F',0.0f };
 						backEx->getSceondEle(&sceEle);
 						if (sceEle.ch == 'F' || sceEle.type == SymbolType::Number) {//尾负号正常运算
@@ -585,34 +589,34 @@ void Calculator::Calculation()
 								}
 							}
 						}
-						*/
+						
 
 						//扫描之后的运算符对比单次入栈数
 
-						int k;
-						for (k = 2;; k++) {
-							Symbol checkEleSym = {SymbolType::Operator,'F',0.0f};
-							backEx->getNEle(&checkEleSym, k);
-							if (checkEleSym.ch == 'F' || checkEleSym.type == SymbolType::Number) {
-								break;
-							}
-						}
-						if (onceNum - (k - 1) >= 1) {//够用
-							Symbol firstEle;
-							symbolStack->popStack(&firstEle);
-							Symbol SceEle;
-							symbolStack->popStack(&SceEle);
-							Symbol newCalEle;
-							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-							symbolStack->pushStack(newCalEle);
-						}
-						else//不够是翻转负号
-						{
-							Symbol firstEle;
-							symbolStack->popStack(&firstEle);
-							firstEle.fl *= -1;
-							symbolStack->pushStack(firstEle);
-						}
+						//int k;
+						//for (k = 2;; k++) {
+						//	Symbol checkEleSym = {SymbolType::Operator,'F',0.0f};
+						//	backEx->getNEle(&checkEleSym, k);
+						//	if (checkEleSym.ch == 'F' || checkEleSym.type == SymbolType::Number) {
+						//		break;
+						//	}
+						//}
+						//if (onceNum - (k - 1) >= 1) {//够用
+						//	Symbol firstEle;
+						//	symbolStack->popStack(&firstEle);
+						//	Symbol SceEle;
+						//	symbolStack->popStack(&SceEle);
+						//	Symbol newCalEle;
+						//	newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+						//	symbolStack->pushStack(newCalEle);
+						//}
+						//else//不够是翻转负号
+						//{
+						//	Symbol firstEle;
+						//	symbolStack->popStack(&firstEle);
+						//	firstEle.fl *= -1;
+						//	symbolStack->pushStack(firstEle);
+						//}
 					}
 					
 					//已经用完单次输入 开始使用栈内所有
@@ -714,5 +718,302 @@ void Calculator::Calculation()
 		popEle = { SymbolType::Number,'\0',calRes };
 		symbolStack->pushStack(popEle);
 	}
-	cout << "表达式计算结果：" << symbolStack->getStackTopEle()->fl << endl;
+	cout << "\n后方复杂判定区分法\n表达式计算结果：" << symbolStack->getStackTopEle()->fl << endl;
+	Calculation2();
+}
+void Calculator::Calculation2()//根据单次入栈运算数和后方运算符 过滤出翻转负号
+{
+	Symbol *exSym;
+	Symbol newSym;
+	symbolStack->clearStack();
+	symbolStack->initStack();
+	bool haveOper = false;//是否已经计算了一次运算符
+	bool isZore = false;
+	int onceNum = 0;
+	//bool isChangeNag = false;
+	while (backEx2->size() != 0)
+	{
+		exSym = backEx2->front();
+		if (exSym->type == SymbolType::Number) {//数字入栈
+
+			newSym = { SymbolType::Number,'\0',exSym->fl };
+			symbolStack->pushStack(newSym);
+			if (haveOper) {
+				onceNum = 0;
+			}
+			haveOper = false;
+			onceNum++;
+			//isChangeNag = false;
+			//cout << "数字: " << exSym->fl << endl;
+		}
+		else
+		{
+			//cout << "算符: " << exSym->ch<<endl;
+			if (!haveOper) {//执行运算
+				onceNum--;
+				haveOper = true;
+				//isChangeNag = false;
+				Symbol firstEle;
+				symbolStack->popStack(&firstEle);
+				Symbol SceEle;
+				symbolStack->popStack(&SceEle);
+				Symbol newCalEle;
+				switch (exSym->ch)
+				{
+				case '+':
+					newCalEle = { SymbolType::Number,'\0',SceEle.fl + firstEle.fl };
+					symbolStack->pushStack(newCalEle);
+					break;
+				case '-':
+					newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+					symbolStack->pushStack(newCalEle);
+					break;
+				case '*':
+					newCalEle = { SymbolType::Number,'\0',SceEle.fl * firstEle.fl };
+					symbolStack->pushStack(newCalEle);
+					break;
+				case '/':
+					if (firstEle.fl == 0) {
+						cerr << "\n发现除0运算！！！\n" << endl;
+						isZore = true;
+					}
+					newCalEle = { SymbolType::Number,'\0',SceEle.fl / firstEle.fl };
+					symbolStack->pushStack(newCalEle);
+					break;
+				case '^':
+					newCalEle = { SymbolType::Number,'\0',pow(SceEle.fl,firstEle.fl) };
+					symbolStack->pushStack(newCalEle);
+					break;
+				case '%':
+					newCalEle = { SymbolType::Number,'\0',(float)((int)SceEle.fl % (int)firstEle.fl) };
+					symbolStack->pushStack(newCalEle);
+					break;
+				default:
+					cerr << "\n后缀式错误！！！a\n" << endl;
+					return;
+				}
+
+			}
+			else
+			{
+				if (exSym->ch == '-') {
+					if (onceNum == 1) {//只有一个 负号乘给该数字
+						Symbol firstEle;
+						symbolStack->popStack(&firstEle);
+						firstEle.fl *= -1;
+						symbolStack->pushStack(firstEle);
+					}
+					else if (onceNum >= 2)//不止一个
+					{
+
+						//Symbol sceEle = { SymbolType::Operator,'F',0.0f };
+						//backEx->getSceondEle(&sceEle);
+						//if (sceEle.ch == 'F' || sceEle.type == SymbolType::Number) {//尾负号正常运算
+						//	Symbol firstEle;
+						//	symbolStack->popStack(&firstEle);
+						//	Symbol SceEle;
+						//	symbolStack->popStack(&SceEle);
+						//	Symbol newCalEle;
+						//	newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+						//	symbolStack->pushStack(newCalEle);
+						//	onceNum--;
+						//}
+						//else
+						//{
+						//	if (sceEle.ch == '*' || sceEle.ch == '/' || sceEle.ch == '^' || sceEle.ch == '%') {
+						//		if (onceNum <= 2) {
+						//			//后方发现高阶运算，是翻转负号
+						//			Symbol firstEle;
+						//			symbolStack->popStack(&firstEle);
+						//			firstEle.fl *= -1;
+
+						//			symbolStack->pushStack(firstEle);
+						//		}
+						//		else
+						//		{
+
+						//			Symbol firstEle;
+						//			symbolStack->popStack(&firstEle);
+						//			Symbol SceEle;
+						//			symbolStack->popStack(&SceEle);
+						//			Symbol newCalEle;
+						//			newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+						//			symbolStack->pushStack(newCalEle);
+						//			onceNum--;
+						//		}
+						//	}
+						//	else
+						//	{
+						//		if (onceNum >= 2) {
+
+						//			if (sceEle.ch == '-') {
+						//				Symbol firstEle;
+						//				symbolStack->popStack(&firstEle);
+						//				Symbol SceEle;
+						//				symbolStack->popStack(&SceEle);
+						//				Symbol newCalEle;
+						//				newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+						//				symbolStack->pushStack(newCalEle);
+						//			}
+						//			else
+						//			{
+						//				if (onceNum > 2) {
+						//					Symbol firstEle;
+						//					symbolStack->popStack(&firstEle);
+						//					Symbol SceEle;
+						//					symbolStack->popStack(&SceEle);
+						//					Symbol newCalEle;
+						//					newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+						//					symbolStack->pushStack(newCalEle);
+						//				}
+						//				else
+						//				{
+						//					Symbol firstEle;
+						//					symbolStack->popStack(&firstEle);
+						//					firstEle.fl *= -1;
+						//					symbolStack->pushStack(firstEle);
+						//				}
+						//			}
+
+						//			onceNum--;
+						//		}
+						//		else
+						//		{
+						//			Symbol firstEle;
+						//			symbolStack->popStack(&firstEle);
+						//			firstEle.fl *= -1;
+						//			symbolStack->pushStack(firstEle);
+						//		}
+						//	}
+						//}
+
+
+						//扫描之后的运算符对比单次入栈数
+
+						int k;
+						for (k = 2;; k++) {
+							Symbol checkEleSym = {SymbolType::Operator,'F',0.0f};
+							backEx2->getNEle(&checkEleSym, k);
+							if (checkEleSym.ch == 'F' || checkEleSym.type == SymbolType::Number) {
+								break;
+							}
+						}
+						if (onceNum - (k - 1) >= 1) {//够用
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							Symbol SceEle;
+							symbolStack->popStack(&SceEle);
+							Symbol newCalEle;
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+						}
+						else//不够是翻转负号
+						{
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							firstEle.fl *= -1;
+							symbolStack->pushStack(firstEle);
+						}
+					}
+
+					//已经用完单次输入 开始使用栈内所有
+					else
+					{
+						if (symbolStack->getSizeNow() >= 2) {
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							Symbol SceEle;
+							symbolStack->popStack(&SceEle);
+							Symbol newCalEle;
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+						}
+						else
+						{
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							firstEle.fl *= -1;
+							symbolStack->pushStack(firstEle);
+						}
+					}
+				}
+				else
+				{
+					//栈中大于两个元素正常计算
+					if (symbolStack->getSizeNow() >= 2)//不止一个
+					{
+						onceNum--;
+						//isChangeNag = false;
+						Symbol firstEle;
+						symbolStack->popStack(&firstEle);
+						Symbol SceEle;
+						symbolStack->popStack(&SceEle);
+						Symbol newCalEle;
+						switch (exSym->ch)
+						{
+						case '+':
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl + firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+							break;
+						case '-':
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+							break;
+						case '*':
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl * firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+							break;
+						case '/':
+							if (firstEle.fl == 0) {
+								cerr << "\n发现除0运算！！！\n" << endl;
+								return;
+							}
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl / firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+							break;
+						case '^':
+							newCalEle = { SymbolType::Number,'\0',pow(SceEle.fl,firstEle.fl) };
+							symbolStack->pushStack(newCalEle);
+							break;
+						case '%':
+							newCalEle = { SymbolType::Number,'\0',(float)((int)SceEle.fl % (int)firstEle.fl) };
+							symbolStack->pushStack(newCalEle);
+							break;
+						default:
+							cerr << "\n后缀式错误！！！a\n" << endl;
+							return;
+						}
+					}
+					else
+					{
+
+						//否则后缀式有误
+						cerr << "\n后缀式错误！！！ 您可能使用了叠加的负号翻转导致无法判断翻转负号和运算负号 \n" << exSym->ch << endl;
+						return;
+					}
+				}
+
+			}
+		}
+		backEx2->pop_front();
+
+	}
+	if (isZore) {
+		return;
+	}
+	if (symbolStack->getSizeNow() == 0) {
+		return;
+	}
+	if (symbolStack->getSizeNow() > 1) {
+		float calRes = 0.0f;
+		Symbol popEle;
+		while (symbolStack->getSizeNow() != 0)
+		{
+			symbolStack->popStack(&popEle);
+			calRes += popEle.fl;
+		}
+		popEle = { SymbolType::Number,'\0',calRes };
+		symbolStack->pushStack(popEle);
+	}
+	cout << "\n前后对比法过滤法\n表达式计算结果：" << symbolStack->getStackTopEle()->fl << endl;
 }
