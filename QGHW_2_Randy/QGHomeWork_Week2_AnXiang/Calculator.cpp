@@ -302,10 +302,12 @@ void Calculator::changeBackEx()
 			else if(checkSymbol->ch == ')')//右括号，弹出栈中元素直到遇到(
 			{
 				Symbol popSym;
+				bool haveOutleft = false;
 				while (symbolStack->getSizeNow()>=1)
 				{
 					symbolStack->popStack(&popSym);
 					if (popSym.ch == '(') {
+						haveOutleft = true;
 						break;
 					}
 					else
@@ -313,7 +315,7 @@ void Calculator::changeBackEx()
 						backEx->push_back(popSym);
 					}
 				}
-				if (symbolStack->getSizeNow() == 0) {
+				if (!haveOutleft) {
 					cerr << "\n非法表达式！！！case13 括号不匹配\n" << endl;
 					reSet();
 					return;
@@ -669,7 +671,7 @@ void Calculator::Calculation()
 					{
 
 						//否则后缀式有误
-						cerr << "\n后缀式错误！！！b \n" << exSym->ch << endl;
+						cerr << "\n后缀式错误！！！ 您可能使用了叠加的负号翻转导致无法判断翻转负号和运算负号 \n" << exSym->ch << endl;
 						return;
 					}
 				}
