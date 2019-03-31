@@ -406,6 +406,7 @@ void Calculator::Calculation()
 	symbolStack->initStack();
 	bool haveOper = false;//是否已经计算了一次运算符
 	bool isZore = false;
+	//int onceNum = 0;
 	//bool isChangeNag = false;
 	while (backEx->size()!=0)
 	{
@@ -414,7 +415,11 @@ void Calculator::Calculation()
 			
 			newSym = { SymbolType::Number,'\0',exSym->fl };
 			symbolStack->pushStack(newSym);
+			//if (haveOper) {
+			//	onceNum = 0;
+			//}
 			haveOper = false;
+			//onceNum++;
 			//isChangeNag = false;
 			//cout << "数字: " << exSym->fl << endl;
 		}
@@ -422,6 +427,7 @@ void Calculator::Calculation()
 		{
 			//cout << "算符: " << exSym->ch<<endl;
 			if (!haveOper) {//执行运算
+				//onceNum--;
 				haveOper = true;
 				//isChangeNag = false;
 				Symbol firstEle;
@@ -486,6 +492,7 @@ void Calculator::Calculation()
 								Symbol newCalEle;
 								newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
 								symbolStack->pushStack(newCalEle);
+							//	onceNum--;
 						}
 						else
 						{
@@ -499,15 +506,46 @@ void Calculator::Calculation()
 							}
 							else
 							{
-								
+								if (symbolStack->getSizeNow() >= 2) {
+
+									if (sceEle.ch == '-') {
+										Symbol firstEle;
+										symbolStack->popStack(&firstEle);
+										Symbol SceEle;
+										symbolStack->popStack(&SceEle);
+										Symbol newCalEle;
+										newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+										symbolStack->pushStack(newCalEle);
+									}
+									else
+									{
+										if (symbolStack->getSizeNow() > 2) {
+											Symbol firstEle;
+											symbolStack->popStack(&firstEle);
+											Symbol SceEle;
+											symbolStack->popStack(&SceEle);
+											Symbol newCalEle;
+											newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+											symbolStack->pushStack(newCalEle);
+										}
+										else
+										{
+											Symbol firstEle;
+											symbolStack->popStack(&firstEle);
+											firstEle.fl *= -1;
+											symbolStack->pushStack(firstEle);
+										}
+									}
 									
+									//onceNum--;
+								}
+								else
+								{
 									Symbol firstEle;
 									symbolStack->popStack(&firstEle);
-									Symbol SceEle;
-									symbolStack->popStack(&SceEle);
-									Symbol newCalEle;
-									newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-									symbolStack->pushStack(newCalEle);
+									firstEle.fl *= -1;
+									symbolStack->pushStack(firstEle);
+								}
 							}
 						}
 
@@ -563,6 +601,7 @@ void Calculator::Calculation()
 					//栈中大于两个元素正常计算
 					if (symbolStack->getSizeNow() >= 2)//不止一个
 					{
+						//onceNum--;
 						//isChangeNag = false;
 						Symbol firstEle;
 						symbolStack->popStack(&firstEle);
