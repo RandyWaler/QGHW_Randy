@@ -502,23 +502,24 @@ void Calculator::Calculation()
 						firstEle.fl *= -1;
 						symbolStack->pushStack(firstEle);
 					}
-					else if(onceNum>=2)//不止一个
+					else if (onceNum >= 2)//不止一个
 					{
+						/*
 						Symbol sceEle = { SymbolType::Operator,'F',0.0f };
 						backEx->getSceondEle(&sceEle);
 						if (sceEle.ch == 'F' || sceEle.type == SymbolType::Number) {//尾负号正常运算
-								Symbol firstEle;
-								symbolStack->popStack(&firstEle);
-								Symbol SceEle;
-								symbolStack->popStack(&SceEle);
-								Symbol newCalEle;
-								newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-								symbolStack->pushStack(newCalEle);
-								onceNum--;
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							Symbol SceEle;
+							symbolStack->popStack(&SceEle);
+							Symbol newCalEle;
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+							onceNum--;
 						}
 						else
 						{
-							if (sceEle.ch == '*' || sceEle.ch == '/' || sceEle.ch == '^' || sceEle.ch == '%' ) {
+							if (sceEle.ch == '*' || sceEle.ch == '/' || sceEle.ch == '^' || sceEle.ch == '%') {
 								if (onceNum <= 2) {
 									//后方发现高阶运算，是翻转负号
 									Symbol firstEle;
@@ -529,6 +530,7 @@ void Calculator::Calculation()
 								}
 								else
 								{
+
 									Symbol firstEle;
 									symbolStack->popStack(&firstEle);
 									Symbol SceEle;
@@ -571,7 +573,7 @@ void Calculator::Calculation()
 											symbolStack->pushStack(firstEle);
 										}
 									}
-									
+
 									onceNum--;
 								}
 								else
@@ -583,7 +585,36 @@ void Calculator::Calculation()
 								}
 							}
 						}
+						*/
+
+						//扫描之后的运算符对比单次入栈数
+
+						int k;
+						for (k = 2;; k++) {
+							Symbol checkEleSym = {SymbolType::Operator,'F',0.0f};
+							backEx->getNEle(&checkEleSym, k);
+							if (checkEleSym.ch == 'F' || checkEleSym.type == SymbolType::Number) {
+								break;
+							}
+						}
+						if (onceNum - (k - 1) >= 1) {//够用
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							Symbol SceEle;
+							symbolStack->popStack(&SceEle);
+							Symbol newCalEle;
+							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+							symbolStack->pushStack(newCalEle);
+						}
+						else//不够是翻转负号
+						{
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							firstEle.fl *= -1;
+							symbolStack->pushStack(firstEle);
+						}
 					}
+					
 					//已经用完单次输入 开始使用栈内所有
 					else
 					{

@@ -104,6 +104,10 @@ public:
 	*获得第二个元素
 	*/
 	void getSceondEle(symbolEle::ElemType* ele);//针对负号处理
+	/*
+	*获得第n个元素
+    */
+	void getNEle(symbolEle::ElemType* ele,int n);//针对负号处理
 };
 
 

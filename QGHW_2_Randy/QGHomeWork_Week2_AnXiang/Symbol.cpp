@@ -257,3 +257,21 @@ void ForwardList::getSceondEle(symbolEle::ElemType * ele)
 	*ele = head->next->next->data;
 
 }
+
+void ForwardList::getNEle(symbolEle::ElemType * ele, int n)
+{
+	if (tail == head) {
+		return;
+	}
+	if (n > listSize) {
+		return;
+	}
+	Node* cur = head;
+	while (n)
+	{
+		cur = cur->next;
+		n--;
+	}
+	*ele = cur->data;
+
+}
