@@ -1,6 +1,2 @@
 ﻿  Calculator.cpp
-c:\users\mebla\source\repos\qghomework_week2_anxiang\qghomework_week2_anxiang\calculator.cpp(38): warning C4101: “chlast”: 未引用的局部变量
-  LinkStack.cpp
-  main.cpp
-  正在生成代码...
   QGHomeWork_Week2_AnXiang.vcxproj -> C:\Users\mebla\source\repos\QGHomeWork_Week2_AnXiang\Debug\QGHomeWork_Week2_AnXiang.exe
