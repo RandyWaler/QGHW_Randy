@@ -44,28 +44,48 @@ void Calculator::getInputEx()
 			float bitNum = 1.0f;//尾位数量级
 			bool isPoint = false;//是否已经遇到小数点
 			float numRes = 0.0f;//数字结果
-	
+			int nagCase = 0;
 			for (; str[i] != '\0'&&str[i] != '\n'&&i<strLength;i++) {//移动下标直到找到一个数字
 				if (str[i] - '0' >= 0 && str[i] - '0' <= 9) {
 					start = i; 
 					break;
 				}
-				else if(str[i]=='-')//遇到的负号视为给数字的负号
+				else if(str[i]=='-')
 				{
-				
-						for (int j = i+1; str[j] != '\0'&&str[j] != '\n'&&j < strLength; j++) {
+					    
+					if (nagCase == 0) {
+						for (int j = i + 1; str[j] != '\0'&&str[j] != '\n'&&j < strLength; j++) {
 							if (str[j] == '(') {
+								nagCase = 1;
+								break;
+							}
+							else if (str[j] - '0' >= 0 && str[j] - '0' <= 9)
+							{
+								nagCase = 2;
+								break;
+							}
+						}
+						if (nagCase == 1) {
+							int nagTime = -1;
+							for (int j = i + 1; str[j] != '\0'&&str[j] != '\n'&&j < strLength; j++) {
+								if (str[j] == '(') {
+									break;
+								}
+								else if (str[j] == '-') {
+									nagTime *= -1;
+								}
+							}
+							if (nagTime == -1) {
 								newSymbol = { SymbolType::Operator,'-',0.0f };
 								middleEx->push_back(newSymbol);
-								break;
 							}
-							else if(str[j]-'0'>=0&&str[j]-'0'<=9)
-							{
-								flagNum *= -1;
-								break;
-							}
-						}					
-					//若之后没有( 视为给数字的负号否则负号入队
+						}
+					}
+					if(nagCase==2)
+					{
+						flagNum *= -1;
+					}
+					
 					
 				}
 				else
@@ -78,6 +98,7 @@ void Calculator::getInputEx()
 					if (str[i] == '(') {
 						newSymbol = { SymbolType::Operator,'(',0.0f };
 						middleEx->push_back(newSymbol);
+						nagCase = 0;
 					}
 				}
 			}
@@ -149,10 +170,50 @@ void Calculator::getInputEx()
 				if (str[i] == '+' || str[i] == '-' || str[i] == '*' || str[i] == '/'||str[i] == '^' || str[i] == '%') {		
 					if (!sigleSym) {
 						sigleSym = true;
-						newSymbol = { SymbolType::Operator,str[i],0.0f };
-						middleEx->push_back(newSymbol);
-						nowWillGetType = SymbolType::Number;
-						continue;
+						if (str[i] == '-') {
+							
+							int nagTime = -1;
+							int j;
+							for (j = i + 1; str[j] != '\0'&&str[j] != '\n'&&j < strLength; j++) {
+								if (str[j] == '-') {
+									nagTime *= -1;
+								}
+								else if(str[j]=='('|| (str[j] - '0' >= 0 && str[j] - '0' <= 9))
+								{
+									break;
+								}
+								else if (str[j] != '+'&&str[j] != '(')
+								{
+									cerr << "\n非法表达式！！！case9 奇异符号\n" << endl;
+									reSet();
+									return;
+								}
+							}
+							if (str[j] == '\0' || str[j] == '\n' || j >= strLength) {
+								cerr << "\n非法表达式！！！case10 运算符不匹配\n" << endl;
+								reSet();
+								return;
+							}
+							if (nagTime == -1) {
+								newSymbol = { SymbolType::Operator,'-',0.0f };
+								middleEx->push_back(newSymbol);
+							}
+							else
+							{
+								newSymbol = { SymbolType::Operator,'+',0.0f };
+								middleEx->push_back(newSymbol);
+							}
+							i = j - 1;
+							continue;
+						}
+						else
+						{
+							newSymbol = { SymbolType::Operator,str[i],0.0f };
+							middleEx->push_back(newSymbol);
+							nowWillGetType = SymbolType::Number;
+							continue;
+						}
+
 					}
 					else
 					{
@@ -330,6 +391,7 @@ void Calculator::Calculation()
 	symbolStack->initStack();
 	bool haveOper = false;//是否已经计算了一次运算符
 	bool isZore = false;
+	bool isChangeNag = false;
 	while (backEx->size()!=0)
 	{
 		exSym = backEx->front();
@@ -338,6 +400,7 @@ void Calculator::Calculation()
 			newSym = { SymbolType::Number,'\0',exSym->fl };
 			symbolStack->pushStack(newSym);
 			haveOper = false;
+			isChangeNag = false;
 			//cout << "数字: " << exSym->fl << endl;
 		}
 		else
@@ -345,6 +408,7 @@ void Calculator::Calculation()
 			//cout << "算符: " << exSym->ch<<endl;
 			if (!haveOper) {//执行运算
 				haveOper = true;
+				isChangeNag = false;
 				Symbol firstEle;
 				symbolStack->popStack(&firstEle);
 				Symbol SceEle;
@@ -397,10 +461,18 @@ void Calculator::Calculation()
 					}
 					else if(symbolStack->getSizeNow()>=2)//不止一个
 					{
-						Symbol sceEle = {SymbolType::Operator,'F',0.0f};
-						backEx->getSceondEle(&sceEle);
-						//尾负号正常运算
-						if (sceEle.ch=='F' || sceEle.type == SymbolType::Number) {
+						if (!isChangeNag) {//一次翻转一次正常运算
+							isChangeNag = true;
+							//乘给第一个数字
+							Symbol firstEle;
+							symbolStack->popStack(&firstEle);
+							firstEle.fl *= -1;
+
+							symbolStack->pushStack(firstEle);
+						}
+						else
+						{
+							isChangeNag = false;
 							Symbol firstEle;
 							symbolStack->popStack(&firstEle);
 							Symbol SceEle;
@@ -409,16 +481,30 @@ void Calculator::Calculation()
 							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
 							symbolStack->pushStack(newCalEle);
 						}
-						else
-						{
-							//非尾负号乘给第一个数字
-							Symbol firstEle;
-							symbolStack->popStack(&firstEle);
-							firstEle.fl *= -1;
-							
-							symbolStack->pushStack(firstEle);
-							//cout << "非尾负号  " <<symbolStack->getStackTopEle()->fl<<"  "<<symbolStack->getSizeNow()<< endl;
-						}
+
+						//Symbol sceEle = {SymbolType::Operator,'F',0.0f};
+						//backEx->getSceondEle(&sceEle);
+						////尾负号正常运算
+						//if (sceEle.ch=='F' || sceEle.type == SymbolType::Number) {
+						//	Symbol firstEle;
+						//	symbolStack->popStack(&firstEle);
+						//	Symbol SceEle;
+						//	symbolStack->popStack(&SceEle);
+						//	Symbol newCalEle;
+						//	newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+						//	symbolStack->pushStack(newCalEle);
+						//}
+						//else
+						//{
+						//	
+						//		//非尾负号乘给第一个数字
+						//		Symbol firstEle;
+						//		symbolStack->popStack(&firstEle);
+						//		firstEle.fl *= -1;
+
+						//		symbolStack->pushStack(firstEle);
+						//	//cout << "非尾负号  " <<symbolStack->getStackTopEle()->fl<<"  "<<symbolStack->getSizeNow()<< endl;
+						//}
 					}
 				}
 				else
@@ -482,6 +568,17 @@ void Calculator::Calculation()
 	}
 	if (isZore) {
 		return;
+	}
+	if (symbolStack->getSizeNow() > 1) {
+		float calRes = 0.0f;
+		Symbol popEle;
+		while (symbolStack->getSizeNow()!=0)
+		{
+			symbolStack->popStack(&popEle);
+			calRes += popEle.fl;
+		}
+		popEle = { SymbolType::Number,'\0',calRes };
+		symbolStack->pushStack(popEle);
 	}
 	cout << "表达式计算结果：" << symbolStack->getStackTopEle()->fl << endl;
 }
