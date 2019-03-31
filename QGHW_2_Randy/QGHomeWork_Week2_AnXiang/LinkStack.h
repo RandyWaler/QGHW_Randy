@@ -109,12 +109,13 @@ inline bool LinkStack<T>::clearStack()
 		return false;
 	}
 	LinkStack::LinkEle* curEle = head->next;
-	LinkStack::LinkEle* preEle;
-	while (curEle)
+	LinkStack::LinkEle* preEle=curEle;
+	while (sizeNow)
 	{
-		preEle = curEle;
 		curEle = curEle->next;
 		free(preEle);
+		preEle = curEle;
+		sizeNow--;
 	}
 
 

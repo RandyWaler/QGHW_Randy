@@ -293,7 +293,7 @@ void Calculator::changeBackEx()
 			else if(checkSymbol->ch == ')')//右括号，弹出栈中元素直到遇到(
 			{
 				Symbol popSym;
-				while (true)
+				while (symbolStack->getSizeNow()>=1)
 				{
 					symbolStack->popStack(&popSym);
 					if (popSym.ch == '(') {
@@ -303,6 +303,11 @@ void Calculator::changeBackEx()
 					{
 						backEx->push_back(popSym);
 					}
+				}
+				if (symbolStack->getSizeNow() == 0) {
+					cerr << "\n非法表达式！！！case12 括号不匹配\n" << endl;
+					reSet();
+					return;
 				}
 			}
 			else if(checkSymbol->ch=='^') //求幂运算符，最高级别
@@ -369,6 +374,7 @@ void Calculator::changeBackEx()
 		middleEx->pop_front();
 	}
 	//剩余栈中元素弹出
+	bool ishaveOper = false;
 	while (!symbolStack->isStackEmpty())
 	{
 		Symbol popSym;
@@ -376,11 +382,21 @@ void Calculator::changeBackEx()
 		if (popSym.ch != '('&&popSym.ch != ')') {
 			backEx->push_back(popSym);
 		}
-	}
-	cout << "后缀式：" << endl;
-	backEx->showAllEleLink();
+		else
+		{
+			cerr << "\n非法表达式！！！case11 括号不匹配\n" << endl;
+			reSet();
+			ishaveOper = true;
+			return;
+		}
 
-	Calculation();
+	}
+	if (!ishaveOper) {
+		cout << "后缀式：" << endl;
+		backEx->showAllEleLink();
+
+		Calculation();
+	}
 }
 
 void Calculator::Calculation()
@@ -391,7 +407,7 @@ void Calculator::Calculation()
 	symbolStack->initStack();
 	bool haveOper = false;//是否已经计算了一次运算符
 	bool isZore = false;
-	bool isChangeNag = false;
+	//bool isChangeNag = false;
 	while (backEx->size()!=0)
 	{
 		exSym = backEx->front();
@@ -400,7 +416,7 @@ void Calculator::Calculation()
 			newSym = { SymbolType::Number,'\0',exSym->fl };
 			symbolStack->pushStack(newSym);
 			haveOper = false;
-			isChangeNag = false;
+			//isChangeNag = false;
 			//cout << "数字: " << exSym->fl << endl;
 		}
 		else
@@ -408,7 +424,7 @@ void Calculator::Calculation()
 			//cout << "算符: " << exSym->ch<<endl;
 			if (!haveOper) {//执行运算
 				haveOper = true;
-				isChangeNag = false;
+				//isChangeNag = false;
 				Symbol firstEle;
 				symbolStack->popStack(&firstEle);
 				Symbol SceEle;
@@ -461,26 +477,62 @@ void Calculator::Calculation()
 					}
 					else if(symbolStack->getSizeNow()>=2)//不止一个
 					{
-						if (!isChangeNag) {//一次翻转一次正常运算
-							isChangeNag = true;
-							//乘给第一个数字
-							Symbol firstEle;
-							symbolStack->popStack(&firstEle);
-							firstEle.fl *= -1;
-
-							symbolStack->pushStack(firstEle);
+						Symbol sceEle = { SymbolType::Operator,'F',0.0f };
+						backEx->getSceondEle(&sceEle);
+						if (sceEle.ch == 'F' || sceEle.type == SymbolType::Number) {//尾负号正常运算
+								Symbol firstEle;
+								symbolStack->popStack(&firstEle);
+								Symbol SceEle;
+								symbolStack->popStack(&SceEle);
+								Symbol newCalEle;
+								newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+								symbolStack->pushStack(newCalEle);
 						}
 						else
 						{
-							isChangeNag = false;
-							Symbol firstEle;
-							symbolStack->popStack(&firstEle);
-							Symbol SceEle;
-							symbolStack->popStack(&SceEle);
-							Symbol newCalEle;
-							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-							symbolStack->pushStack(newCalEle);
+							if (sceEle.ch == '*' || sceEle.ch == '/' || sceEle.ch == '^' || sceEle.ch == '%' ) {
+									//后方发现高阶运算，是翻转负号
+									Symbol firstEle;
+									symbolStack->popStack(&firstEle);
+									firstEle.fl *= -1;
+
+									symbolStack->pushStack(firstEle);
+							}
+							else
+							{
+								
+									
+									Symbol firstEle;
+									symbolStack->popStack(&firstEle);
+									Symbol SceEle;
+									symbolStack->popStack(&SceEle);
+									Symbol newCalEle;
+									newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+									symbolStack->pushStack(newCalEle);
+							}
 						}
+
+
+						//if (!isChangeNag) {//一次翻转一次正常运算
+						//	isChangeNag = true;
+						//	//乘给第一个数字
+						//	Symbol firstEle;
+						//	symbolStack->popStack(&firstEle);
+						//	firstEle.fl *= -1;
+
+						//	symbolStack->pushStack(firstEle);
+						//}
+						//else
+						//{
+						//	isChangeNag = false;
+						//	Symbol firstEle;
+						//	symbolStack->popStack(&firstEle);
+						//	Symbol SceEle;
+						//	symbolStack->popStack(&SceEle);
+						//	Symbol newCalEle;
+						//	newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
+						//	symbolStack->pushStack(newCalEle);
+						//}
 
 						//Symbol sceEle = {SymbolType::Operator,'F',0.0f};
 						//backEx->getSceondEle(&sceEle);
@@ -512,6 +564,7 @@ void Calculator::Calculation()
 					//栈中大于两个元素正常计算
 					if (symbolStack->getSizeNow() >= 2)//不止一个
 					{
+						//isChangeNag = false;
 						Symbol firstEle;
 						symbolStack->popStack(&firstEle);
 						Symbol SceEle;
@@ -567,6 +620,9 @@ void Calculator::Calculation()
 
 	}
 	if (isZore) {
+		return;
+	}
+	if (symbolStack->getSizeNow() == 0) {
 		return;
 	}
 	if (symbolStack->getSizeNow() > 1) {
