@@ -817,88 +817,6 @@ void Calculator::Calculation2()//根据单次入栈运算数和后方运算符 过滤出翻转负号
 					else if (onceNum >= 2)//不止一个
 					{
 
-						//Symbol sceEle = { SymbolType::Operator,'F',0.0f };
-						//backEx->getSceondEle(&sceEle);
-						//if (sceEle.ch == 'F' || sceEle.type == SymbolType::Number) {//尾负号正常运算
-						//	Symbol firstEle;
-						//	symbolStack->popStack(&firstEle);
-						//	Symbol SceEle;
-						//	symbolStack->popStack(&SceEle);
-						//	Symbol newCalEle;
-						//	newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-						//	symbolStack->pushStack(newCalEle);
-						//	onceNum--;
-						//}
-						//else
-						//{
-						//	if (sceEle.ch == '*' || sceEle.ch == '/' || sceEle.ch == '^' || sceEle.ch == '%') {
-						//		if (onceNum <= 2) {
-						//			//后方发现高阶运算，是翻转负号
-						//			Symbol firstEle;
-						//			symbolStack->popStack(&firstEle);
-						//			firstEle.fl *= -1;
-
-						//			symbolStack->pushStack(firstEle);
-						//		}
-						//		else
-						//		{
-
-						//			Symbol firstEle;
-						//			symbolStack->popStack(&firstEle);
-						//			Symbol SceEle;
-						//			symbolStack->popStack(&SceEle);
-						//			Symbol newCalEle;
-						//			newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-						//			symbolStack->pushStack(newCalEle);
-						//			onceNum--;
-						//		}
-						//	}
-						//	else
-						//	{
-						//		if (onceNum >= 2) {
-
-						//			if (sceEle.ch == '-') {
-						//				Symbol firstEle;
-						//				symbolStack->popStack(&firstEle);
-						//				Symbol SceEle;
-						//				symbolStack->popStack(&SceEle);
-						//				Symbol newCalEle;
-						//				newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-						//				symbolStack->pushStack(newCalEle);
-						//			}
-						//			else
-						//			{
-						//				if (onceNum > 2) {
-						//					Symbol firstEle;
-						//					symbolStack->popStack(&firstEle);
-						//					Symbol SceEle;
-						//					symbolStack->popStack(&SceEle);
-						//					Symbol newCalEle;
-						//					newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
-						//					symbolStack->pushStack(newCalEle);
-						//				}
-						//				else
-						//				{
-						//					Symbol firstEle;
-						//					symbolStack->popStack(&firstEle);
-						//					firstEle.fl *= -1;
-						//					symbolStack->pushStack(firstEle);
-						//				}
-						//			}
-
-						//			onceNum--;
-						//		}
-						//		else
-						//		{
-						//			Symbol firstEle;
-						//			symbolStack->popStack(&firstEle);
-						//			firstEle.fl *= -1;
-						//			symbolStack->pushStack(firstEle);
-						//		}
-						//	}
-						//}
-
-
 						//扫描之后的运算符对比单次入栈数
 
 						int k;
@@ -917,6 +835,7 @@ void Calculator::Calculation2()//根据单次入栈运算数和后方运算符 过滤出翻转负号
 							Symbol newCalEle;
 							newCalEle = { SymbolType::Number,'\0',SceEle.fl - firstEle.fl };
 							symbolStack->pushStack(newCalEle);
+							onceNum--;
 						}
 						else//不够是翻转负号
 						{
