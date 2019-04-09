@@ -1,0 +1,4 @@
+﻿  GameApp.cpp
+c:\users\mebla\source\repos\learn_dx11_03\learn_dx11_03\gameapp.cpp(70): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+c:\users\mebla\source\repos\learn_dx11_03\learn_dx11_03\gameapp.cpp(71): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+  Learn_Dx11_03.vcxproj -> C:\Users\mebla\source\repos\Learn_Dx11_03\Debug\Learn_Dx11_03.exe
