@@ -10,9 +10,9 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
     //float4 texColor2 = g_TexB.Sample(g_SamLinear, float2(finalTexPoint.x, finalTexPoint.y));
 
 	float4 texColor = g_Tex.Sample(g_SamLinear, pIn.Tex);
-	float4 texColor2 = g_TexB.Sample(g_SamLinear, pIn.Tex);
+	float4 texColor2 = g_Tex1.Sample(g_SamLinear, pIn.Tex);
 
-    return float4(texColor.x*texColor2.x,texColor.y*texColor2.y,texColor.z*texColor2.z,texColor.w*texColor2.w);
+    return texColor*texColor2;
 }
 // ÏñËØ×ÅÉ«Æ÷(3D)
 //float4 PS(VertexPosHTex pIn) : SV_Target

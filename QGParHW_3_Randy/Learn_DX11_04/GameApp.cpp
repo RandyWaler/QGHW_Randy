@@ -83,7 +83,7 @@ void GameApp::OnResize()
 
 void GameApp::UpdateScene(float dt)
 {
-
+	static float roZ = 0.0f;
 	// 获取键盘状态
 	Keyboard::State keyState = m_pKeyboard->GetState();
 	m_KeyboardTracker.Update(keyState);
@@ -206,8 +206,8 @@ void GameApp::UpdateScene(float dt)
 			// 旋转纹理常量缓冲区对应HLSL寄存于b2的常量缓冲区
 			m_pd3dImmediateContext->VSSetConstantBuffers(1, 1, m_pConstantBuffers[2].GetAddressOf());
 
-			static float roZ = 0.0f;
-			roZ += 0.00001f;
+			
+			roZ += 0.001f;
 
 			m_PSConstantBufferRotate.rotate = XMMatrixTranspose(XMMatrixTranslation(-0.5f,-0.5f,0)*XMMatrixRotationZ(roZ)*XMMatrixTranslation(0.5f,0.5f,0));
 			HR(m_pd3dImmediateContext->Map(m_pConstantBuffers[2].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
@@ -243,12 +243,10 @@ void GameApp::DrawScene()
 	if (nowType == NowPlayType::Cube00) {
 		for (int i = 0; i < 6; i++) {
 			m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_pCubeTex[i].GetAddressOf());
-			m_pd3dImmediateContext->DrawIndexed((i + 1) * 6, 0, 0);
+			m_pd3dImmediateContext->DrawIndexed( 6, i*6, 0);
 		}
 	}
 	else if (nowType == NowPlayType::Cube01) {
-		m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_proCubeTex.GetAddressOf());
-		m_pd3dImmediateContext->PSSetShaderResources(1, 1, m_proCubeTex2.GetAddressOf());
 		m_pd3dImmediateContext->DrawIndexed(m_IndexCount, 0, 0);
 	}
 	else
@@ -453,7 +451,7 @@ bool GameApp::InitResource()
 	// PS常量缓冲区对应HLSL寄存于b1的常量缓冲区
 	m_pd3dImmediateContext->PSSetConstantBuffers(1, 1, m_pConstantBuffers[1].GetAddressOf());
 	// 旋转纹理常量缓冲区对应HLSL寄存于b2的常量缓冲区
-	m_pd3dImmediateContext->VSSetConstantBuffers(1, 1, m_pConstantBuffers[2].GetAddressOf());
+	m_pd3dImmediateContext->VSSetConstantBuffers(2, 1, m_pConstantBuffers[2].GetAddressOf());
 
 	// 像素着色阶段设置好采样器
 	m_pd3dImmediateContext->PSSetSamplers(0, 1, m_pSamplerState.GetAddressOf());

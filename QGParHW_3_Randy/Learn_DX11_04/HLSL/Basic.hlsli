@@ -1,7 +1,7 @@
 #include "LightHelper.hlsli"
 
 Texture2D g_Tex : register(t0);
-Texture2D g_TexB : register(t1);
+Texture2D g_Tex1 : register(t1);
 
 SamplerState g_SamLinear : register(s0);
 
@@ -24,7 +24,7 @@ cbuffer PSConstantBuffer : register(b1)
 
 cbuffer PSConstantBufferRotate : register(b2)
 {
-	matrix g_Rotate;
+	float4x4 g_Rotate;
 }
 
 
